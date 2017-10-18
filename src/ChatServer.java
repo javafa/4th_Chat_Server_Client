@@ -43,9 +43,8 @@ class ClientProcess extends Thread{
 			BufferedReader br = new BufferedReader(isr);
 			String msg = "";
 			// 2. exit가 아닐때까지 한줄씩 읽어서 내용을 출력 
-			while(!"exit".equals(msg=br.readLine())){
-				if(msg == null)
-					break;
+			while((msg=br.readLine()) != null){
+				if("exit".equals(msg)) break;
 				System.out.println(client.getInetAddress()+":"+msg);
 			}
 			// 연결닫기
