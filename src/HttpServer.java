@@ -1,8 +1,14 @@
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+import javax.activation.MimetypesFileTypeMap;
 
 public class HttpServer {
 	public static void main(String[] args) {
@@ -50,8 +56,33 @@ class WebServer extends Thread {
 								os.write(msg.getBytes());
 								os.flush();
 							}else{
+								String dir = "c:/temp";
+								// Path를 사용한 파일처리
+								Path path = Paths.get(dir+"/"+cmd[1]);
+								byte content[] = Files.readAllBytes(path);
 								
+								if(Files.exists(path)){
+									OutputStream os = client.getOutputStream();
+									String mimeType = Files.probeContentType(path);
+									// 화면에는 보이지 않는 메타정보
+									os.write("HTTP/1.0 200 OK \r\n".getBytes());
+									if("plain/text".equals(mimeType)){
+										os.write("Content-Type: text/html \r\n".getBytes());
+									}else{
+										os.write(("Content-Type: "+mimeType+" \r\n").getBytes());
+									}
+									// 파일을 읽고 byte 배열로 변환한후 사이즈를
+									int size = content.length;
+									os.write(("Content-Length: "+size+"\r\n").getBytes());
+									// 헤더와 바디 구분자를 전송
+									os.write("\r\n".getBytes());
+									// 실제 전달되는 데이터
+									os.write(content);
+									os.flush();
+									os.close();
+								}
 							}
+							client.close();
 						}catch(Exception e){e.getStackTrace();}
 					}
 				}.start();
